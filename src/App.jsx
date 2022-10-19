@@ -1,35 +1,61 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+// import { useState } from 'react'
+// import reactLogo from './assets/react.svg'
+import { Routes, Route, Link,Outlet } from "react-router-dom";
+
+function Home() {
+  return (
+    <>
+      <main>
+        <h2>首頁</h2>
+        <p>歡迎來到首頁</p>
+      </main>
+      
+    </>
+  );
+}
+
+
+
+function Layout() {
+  return (
+    <>
+      <div className="text-orange-200">
+      表頭
+      <nav className="flex list-none text-blue-600">
+        <li>
+          <Link to='/'>Home</Link>
+        </li>
+        <li>
+          <Link to='/faq'>faq</Link>
+        </li>
+        <li>
+          <Link to='/tour'>Tour</Link>
+        </li>
+      </nav>
+      </div>
+      <div className="content">
+        <Outlet />
+      </div>
+      <div className="footer">表尾</div>
+    </>
+  );
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  //  
 
   return (
     <div className="App">
-      <h1 className="text-3xl font-bold underline">
-        Hello world!
-      </h1>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+            <Route path="/" element={<Home />} />
+            {/* <Route path="/faq" element={<FAQ />} />
+            <Route path="/tour" element={<Tour />} >
+             <Route index element={<TourList />} />
+             <Route path=":Id" element={<TourDetail />} />
+            </Route> */}
+        </Route>
+      </Routes>
     </div>
   )
 }
