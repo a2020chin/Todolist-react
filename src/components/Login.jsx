@@ -1,48 +1,48 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from 'react-hook-form';
+import { logIn } from "../services/UserApi";
+import { useAuth } from "./Context";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal)
 
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const onSubmit = data => console.log(data);
-  console.log(errors);
-//   const onSubmit = data => {
-//     const _url = "https://todoo.5xcamp.us/users/sign_in";
-//     let myHeaders = new Headers();
-//     myHeaders.append("Content-Type", "application/json");
-//     fetch(_url, {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify({
-//             user: data
-//         })
-//     })
-//     .then(res => {
-//         console.log(res)
-//         if(res.status===401){
-//             throw new Error('登入失敗，請重新檢驗！');
-//         }
-//         setToken(res.headers.get("authorization"));
-//         return res.json()
-//     })
-//     .then(res => {
-//         navigate('/todo')
-//     })
-//     .catch(err=>{
-//         console.log(err)
-//         return MySwal.fire({
-//             title: err.message,
-//             })
-//     })
-// }
+  let navigate = useNavigate();
+  const { setToken } = useAuth();
+
+  const onSubmit = async (user) => {
+
+    let data = { user };
+    console.log(data)
+
+    await logIn(data).then((response) => {
+      setToken(response.headers.authorization);
+      MySwal.fire({
+        icon: 'success',
+        title: response.data.message ? response.data.message : '登入成功',
+        text: `歡迎 ${response.data.nickname ? response.data.nickname : 'Anonymous'}`
+      })
+      navigate('/todolist')
+      // console.log(response)
+    }).catch((errors) => {
+      MySwal.fire({
+        icon: 'error',
+        title: errors.response.data.error ? errors.response.data.error : '登入失敗',
+      })
+      // console.log(errors)
+    })
+  }
+
   
+
   return (
     <main>
       <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)}>
         <h2 className="text-2xl font-bold mb-6">最實用的線上代辦事項服務</h2>
-        <label className="block font-bold text-sm mb-1" for="email">Email</label>
+        <label className="block font-bold text-sm mb-1" htmlFor="email">Email</label>
         <input className="mb-1 w-full rounded-[10px] py-3 px-4 focus:ring-4 focus:outline-0" id="email" type="text" placeholder="請輸入Email" {...register("email",{
           required: {
             value: true,
@@ -55,7 +55,7 @@ const Login = () => {
         })} />
         <p className="text-[#d87355] font-bold text-sm mb-4">{errors.email?.message}</p>
 
-        <label className="block font-bold text-sm mb-1" for="password">密碼</label>
+        <label className="block font-bold text-sm mb-1" htmlFor="password">密碼</label>
         <input className="mb-1 w-full rounded-[10px] py-3 px-4 focus:ring-4 focus:outline-0" id="password" type="password" placeholder="請輸入密碼" {...register("password",{
           required: {
             value: true,
