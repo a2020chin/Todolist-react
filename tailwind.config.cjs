@@ -12,7 +12,11 @@ module.exports = {
       center: true, 
       padding: "12px"
     },
-    extend: {},
+    extend: {
+      backgroundImage: {
+        'todo-bg': "linear-gradient(172.7deg, #FFD370 5.12%, #FFD370 53.33%, #FFD370 53.44%, #FFFFFF 53.45%, #FFFFFF 94.32%)",
+      }
+    },
   },
   plugins: [],
 }

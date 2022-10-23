@@ -18,7 +18,7 @@ const Login = () => {
     let data = { user };
     console.log(data)
 
-    await logIn(data).then((response) => {
+    await logIn(data).then( (response) => {
       setToken(response.headers.authorization);
       MySwal.fire({
         icon: 'success',
@@ -39,7 +39,7 @@ const Login = () => {
   
 
   return (
-    <main>
+    <>
       <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)}>
         <h2 className="text-2xl font-bold mb-6">最實用的線上代辦事項服務</h2>
         <label className="block font-bold text-sm mb-1" htmlFor="email">Email</label>
@@ -72,7 +72,7 @@ const Login = () => {
         <br />
         <Link className="font-bold self-center" to="/signup">註冊帳號</Link>
       </form>
-    </main>
+    </>
   );
 }
 
