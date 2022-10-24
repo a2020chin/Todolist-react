@@ -26,6 +26,8 @@ const Login = () => {
         text: `歡迎 ${response.data.nickname ? response.data.nickname : 'Anonymous'}`
       })
       navigate('/todolist')
+      localStorage.setItem('token', response.headers.authorization)
+      localStorage.setItem('nickName', response.data.nickname ? response.data.nickname : 'Anonymous')
       // console.log(response)
     }).catch((errors) => {
       MySwal.fire({
