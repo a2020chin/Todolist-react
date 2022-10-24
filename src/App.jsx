@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Login from "./components/Login";
 import SignUp from "./components/SignUp";
 import Todolist from "./components/Todolist"
+import TodoMenu from './components/TodoMenu';
 import { Routes, Route } from "react-router-dom";
 import { AuthContext } from "./components/Context";
 import { Layout } from './components/Layout';
@@ -18,8 +19,8 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
           </Route>
           <Route path="/todolist" element={<Todolist />} >
-            {/* <Route index element={<TourList />} />
-            <Route path=":Id" element={<TourDetail />} /> */}
+            <Route index element={<TodoMenu />} />
+            {/* <Route path=":Id" element={<TourDetail />} /> */}
           </Route>
         </Routes>
       </AuthContext.Provider>

@@ -9,6 +9,17 @@ import withReactContent from 'sweetalert2-react-content';
 const MySwal = withReactContent(Swal);
 
 
+const NullTodo = () => {
+  return (
+    <>
+      <div className="flex flex-col items-center">
+        <h2 className="mt-[60px] mb-4 text-3xl">目前尚無待辦事項</h2>
+        <img className="w-1/2" src="./images/empty1.svg" alt="" />
+      </div>
+    </>
+  )
+}
+
 
 
 const Todolist = () => {
@@ -41,8 +52,7 @@ const Todolist = () => {
     e.preventDefault()
 
     if(todoValue.trim() === ''){
-      setTodoValue('')
-      document.querySelector('#inputTodo')
+      document.querySelector('#inputTodo').focus()
 
       return MySwal.fire({
         icon: 'error',
@@ -55,6 +65,7 @@ const Todolist = () => {
     }
 
     await axios.post(_url,data).then(() => {
+      setTodoValue('')
       toast.success('新增代辦事項成功', {
         position: "bottom-right",
         autoClose: 3000,
@@ -66,6 +77,7 @@ const Todolist = () => {
         theme: "colored",
         });
       getTodo()
+      document.querySelector('#inputTodo').focus()
     }).catch(() => {
       toast.error('請輸入資料', {
         position: "bottom-right",
@@ -77,6 +89,7 @@ const Todolist = () => {
         progress: '',
         theme: "colored",
         })
+      document.querySelector('#inputTodo').focus()
     })
   }
 
@@ -86,7 +99,7 @@ const Todolist = () => {
         <header className="container flex justify-between py-4 items-center">
           <Link to='/todolist'><img className="" src="./images/title.png" alt="" /></Link>
           <div className="flex items-center">
-            <h2 className="font-bold mr-6">{localStorage.getItem('nickName')}的代辦</h2>
+            <h1 className="font-bold mr-6">{localStorage.getItem('nickName')}的代辦</h1>
             <input className="p-2 rounded-xl cursor-pointer hover:ring-4" type="button" value="登出" />
           </div>
         </header>
@@ -99,6 +112,7 @@ const Todolist = () => {
               <i className="fa fa-plus align-super"></i>
             </a>
           </div>
+          { todos.length != 0 ? <Outlet /> : <NullTodo />}
         </div>
         <ToastContainer />
       </div>
