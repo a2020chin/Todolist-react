@@ -9,6 +9,11 @@ import withReactContent from 'sweetalert2-react-content';
 const MySwal = withReactContent(Swal);
 
 
+
+
+
+
+
 const NullTodo = () => {
   return (
     <>
@@ -33,12 +38,14 @@ const Todolist = () => {
 
 
 
+
+
   useEffect(() => {
     getTodo()
   },[]);
 
-  const getTodo = async () => {
-    await axios.get(_url).then((response) => {
+  const getTodo =  () => {
+     axios.get(_url).then((response) => {
       console.log(response)
       setTodos(response.data?.todos)
     }).catch(() => {
@@ -67,7 +74,7 @@ const Todolist = () => {
     await axios.post(_url,data).then(() => {
       setTodoValue('')
       toast.success('新增代辦事項成功', {
-        position: "bottom-right",
+        position: "bottom-right", 
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -92,6 +99,84 @@ const Todolist = () => {
       document.querySelector('#inputTodo').focus()
     })
   }
+  const rmTodo = async(todolist) => {
+    await axios.delete(`${_url}/${todolist.id}`).then((response) => {
+      getTodo()
+      toast.success('刪除成功', {
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: '',
+        theme: "colored",
+        })
+    }).catch(() => {
+      toast.error('刪除資料失敗', {
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: '',
+        theme: "colored",
+        })
+    })
+  }
+
+  const TodoRender = (props) => {
+    return (
+      <>
+        <li>
+          <label htmlFor="">
+            <input type="checkbox" id="" defaultChecked={props.completed_at} />
+            <p>{props.content}</p>
+          </label>
+          <a href="#" onClick={(e)=>{
+            e.preventDefault()
+            rmTodo()
+          }}></a>
+        </li>
+      </>
+    )
+  }
+  const Render = () => {
+    // console.log(todos)
+    return todos.map((item, i)=>{ 
+      console.log(item)
+      return <TodoRender key={i} props={item} />
+    })
+  }
+
+
+  const TodoMenu = () => {
+
+    const [state, setState] = useState('all')
+  
+  
+    const changeState = (e, state) => {
+      e.preventDefault()
+      setState(state)
+    }
+  
+    return (
+      <>
+        <div className="bg-white rounded-[10px]">
+          <ul className="flex justify-between">
+            <li className="w-1/3"><a className={`block py-4 text-center text-sm  border-b-2  ${state === 'all'? 'text-[#333333] border-[#333333]':'text-[#9F9A91] border-[#EFEFEF]'}`} onClick={(e)=>{changeState(e,'all')}} href="#">全部</a></li>
+            <li className="w-1/3"><a className={`block py-4 text-center text-sm  border-b-2  ${state === 'active'? 'text-[#333333] border-[#333333]':'text-[#9F9A91] border-[#EFEFEF]'}`} onClick={(e)=>{changeState(e,'active')}} href="#">待完成</a></li>
+            <li className="w-1/3"><a className={`block py-4 text-center text-sm  border-b-2  ${state === 'completed'? 'text-[#333333] border-[#333333]':'text-[#9F9A91] border-[#EFEFEF]'}`} onClick={(e)=>{changeState(e,'completed')}} href="#">已完成</a></li>
+          </ul>
+          <ul>
+            {Render()}
+          </ul>
+        </div>
+      </>
+    )
+  }
+
 
   return (
     <>
@@ -112,7 +197,7 @@ const Todolist = () => {
               <i className="fa fa-plus align-super"></i>
             </a>
           </div>
-          { todos.length != 0 ? <Outlet /> : <NullTodo />}
+          { todos.length != 0 ? <TodoMenu /> : <NullTodo />}
         </div>
         <ToastContainer />
       </div>

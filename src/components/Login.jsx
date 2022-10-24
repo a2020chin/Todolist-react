@@ -32,7 +32,7 @@ const Login = () => {
     }).catch((errors) => {
       MySwal.fire({
         icon: 'error',
-        title: errors.response.data.error ? errors.response.data.error : '登入失敗',
+        title: '登入失敗',
       })
       // console.log(errors)
     })
