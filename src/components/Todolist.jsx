@@ -33,6 +33,7 @@ const Todolist = () => {
   const [todos, setTodos]= useState([]); // 存todo資料
   const [todoValue,setTodoValue] = useState("") //addtodo資料
   const [state, setState] = useState('all') //判斷全部、已完成、未完成的分類
+  const [waitTodo, setWaitTodo] = useState(null)
   const _url = 'https://todoo.5xcamp.us/todos'
   const navigate = useNavigate();
 
@@ -96,6 +97,7 @@ const Todolist = () => {
         });
       getTodo()
       document.querySelector('#inputTodo').focus()
+      document.querySelector('#inputTodo').value = ''
     }).catch(() => {
       toast.error('請輸入資料', {
         position: "bottom-right",
@@ -124,6 +126,7 @@ const Todolist = () => {
           progress: '',
           theme: "colored",
           })
+        
       }).catch(() => {
         toast.error('刪除資料失敗', {
           position: "bottom-right",
@@ -140,8 +143,8 @@ const Todolist = () => {
       await axios.delete(`${_url}/${todolist.id}`)
     }
   }
-  const toggleTodo = (todolist) => {
-    axios.patch(`${_url}/${todolist.id}/toggle`).then((response) => {
+  const toggleTodo = async (todolist) => {
+    await axios.patch(`${_url}/${todolist.id}/toggle`).then((response) => {
       toast.success('代辦更新完成', {
         position: "bottom-right",
         autoClose: 2000,
@@ -154,6 +157,7 @@ const Todolist = () => {
         }
       )
       todolist.completed_at = todolist.completed_at ? false : true
+      
     }).catch(() => {
       toast.error('toggle失败', {
         position: "bottom-right",
@@ -164,19 +168,32 @@ const Todolist = () => {
         draggable: true,
         progress: '',
         theme: "colored",
-  })
-  })
+        }
+      )
+    })
+    setWaitTodo(todos.filter((item)=>{return !item.completed_at}).length)
   }
   const rmActiveTodoAll = async () => {
-    const needDelete = todos.filter((item)=>{return item.completed_at})
-    const test = needDelete.map((item)=>{
+    const needDelete = todos.filter((item)=>{return item.completed_at}).map((item)=>{
       return new Promise(async (resolve) => {
         await rmTodo(item ,true)
         resolve()
       })
     })
-    await Promise.all(test)
-    console.log(needDelete , test)
+    await Promise.all(needDelete).then(() => {
+      toast.success('已完成代辦事項全刪除完成', {
+        position: "bottom-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: '',
+        theme: "colored",
+        }
+      )
+    })
+    // console.log(needDelet)
     
     getTodo()
   }
@@ -195,6 +212,7 @@ const Todolist = () => {
           onClick={(e)=>{
             e.preventDefault()
             rmTodo(props)
+
           }}>
             <i className="fa-solid fa-x"></i>
           </a>
@@ -226,7 +244,7 @@ const Todolist = () => {
       e.preventDefault()
       setState(state)
     }
-  
+
     return (
       <>
         <div className="bg-white rounded-[10px] shadow-[0px_0px_15px_rgba(0,0,0,0.15)]">
@@ -239,7 +257,7 @@ const Todolist = () => {
             {Render()}
           </ul>
           <div className="flex justify-between items-center mt-6 pb-8">
-            <p className="ml-6">{todos.filter((item)=>{return !item.completed_at}).length} 個待完成事項</p>
+            <p className="ml-6">{ waitTodo || todos.filter((item)=>{return !item.completed_at}).length} 個待完成事項</p>
             <a className="text-[#9F9A91] mr-12" href="#" onClick={(e)=>{
               e.preventDefault()
               rmActiveTodoAll()

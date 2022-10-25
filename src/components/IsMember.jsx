@@ -5,7 +5,7 @@ import { Outlet, useNavigate } from "react-router-dom"
 const IsMember = () => {
     const { token } = useAuth()
     const navigate = useNavigate()
-    console.log(localStorage.getItem('token'))
+    // console.log(localStorage.getItem('token'))
     useEffect(() => {
         if ((!localStorage.getItem('token')) && !token) { 
             navigate("/")

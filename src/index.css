@@ -11,7 +11,7 @@
 @layer components{
   /* https://github.com/tailwindlabs/tailwindcss-forms/issues/27 */
   [type='checkbox'].todocheck:checked {
-    background-image: url(../public/images/Vector.svg);
+    background-image: url(./images/Vector.svg);
     @apply text-transparent
   } 
 }

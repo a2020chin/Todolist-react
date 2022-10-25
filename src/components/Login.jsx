@@ -16,7 +16,7 @@ const Login = () => {
   const onSubmit = async (user) => {
 
     let data = { user };
-    console.log(data)
+    // console.log(data)
 
     await logIn(data).then( (response) => {
       setToken(response.headers.authorization);
