@@ -6,6 +6,7 @@ import Todolist from "./components/Todolist"
 import { Routes, Route } from "react-router-dom";
 import { AuthContext } from "./components/Context";
 import { Layout } from './components/Layout';
+import IsMember from './components/IsMember';
 
 
 function App() {
@@ -18,9 +19,8 @@ function App() {
               <Route index element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
           </Route>
-          <Route path="/todolist" element={<Todolist />} >
-            {/* <Route index element={<TodoMenu />} /> */}
-            {/* <Route path=":Id" element={<TourDetail />} /> */}
+          <Route element={<IsMember />} >
+              <Route path="/todolist" element={<Todolist />} />
           </Route>
         </Routes>
       </AuthContext.Provider>

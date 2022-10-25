@@ -10,7 +10,7 @@ module.exports = {
     },
     container: {
       center: true, 
-      padding: "12px"
+      padding: "32px"
     },
     extend: {
       backgroundImage: {
@@ -18,5 +18,7 @@ module.exports = {
       }
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms'),
+  ],
 }

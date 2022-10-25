@@ -9,7 +9,7 @@ const MySwal = withReactContent(Swal)
 
 const SignUp = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
-  let navigate = useNavigate()
+  const navigate = useNavigate()
 
 
     const onSubmit = async (user) => {
@@ -37,7 +37,7 @@ const SignUp = () => {
   return(
     <>
       <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)}>
-        <h2 className="text-2xl font-bold mb-6">註冊帳號</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center md:text-left">註冊帳號</h2>
         <label className="block font-bold text-sm mb-1" htmlFor="email">Email</label>
         <input className="mb-1 w-full rounded-[10px] py-3 px-4 focus:ring-4 focus:outline-0" id="email" type="text" placeholder="請輸入Email" {...register("email",{
           required: {
