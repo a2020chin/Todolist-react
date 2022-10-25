@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, Outlet } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import axios from "axios";
 import { useAuth } from "./Context";
 import { ToastContainer, toast } from "react-toastify";
@@ -30,13 +30,13 @@ const NullTodo = () => {
 const Todolist = () => {
 
   const {token, setToken} = useAuth();
-  const [todos, setTodos]= useState([]);
-  const [todoValue,setTodoValue] = useState("")
+  const [todos, setTodos]= useState([]); // 存todo資料
+  const [todoValue,setTodoValue] = useState("") //addtodo資料
+  const [state, setState] = useState('all') //判斷全部、已完成、未完成的分類
   const _url = 'https://todoo.5xcamp.us/todos'
+  let navigate = useNavigate();
 
   axios.defaults.headers.common['Authorization'] = token || localStorage.getItem('token');
-
-
 
 
 
@@ -44,9 +44,25 @@ const Todolist = () => {
     getTodo()
   },[]);
 
-  const getTodo =  () => {
-     axios.get(_url).then((response) => {
-      console.log(response)
+  const signOut = () => {
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('nickName');
+    
+    axios.delete(`https://todoo.5xcamp.us/users/sign_out`).then(() =>{
+    navigate('/')
+    MySwal.fire({
+      icon: 'success',
+      title: '登出成功'
+    }).catch(errors => {
+      console.log(errors)
+    })
+  })
+}
+
+  const getTodo = () => {
+    axios.get(_url).then((response) => {
+      // console.log(response)
       setTodos(response.data?.todos)
     }).catch(() => {
       MySwal.fire({
@@ -55,7 +71,7 @@ const Todolist = () => {
       })
     })
   }
-  const setTodo = async (e) => {
+  const setTodo = (e) => {
     e.preventDefault()
 
     if(todoValue.trim() === ''){
@@ -71,7 +87,7 @@ const Todolist = () => {
       content: todoValue.trim(),
     }
 
-    await axios.post(_url,data).then(() => {
+    axios.post(_url,data).then(() => {
       setTodoValue('')
       toast.success('新增代辦事項成功', {
         position: "bottom-right", 
@@ -99,10 +115,39 @@ const Todolist = () => {
       document.querySelector('#inputTodo').focus()
     })
   }
-  const rmTodo = async(todolist) => {
-    await axios.delete(`${_url}/${todolist.id}`).then((response) => {
-      getTodo()
-      toast.success('刪除成功', {
+  const rmTodo = async (todolist, isAll = false) => {
+    if(!isAll){
+      await axios.delete(`${_url}/${todolist.id}`).then((response) => {
+        getTodo()
+        toast.success('刪除成功', {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: '',
+          theme: "colored",
+          })
+      }).catch(() => {
+        toast.error('刪除資料失敗', {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: '',
+          theme: "colored",
+          })
+      })
+    }else{
+      await axios.delete(`${_url}/${todolist.id}`)
+    }
+  }
+  const toggleTodo = (todolist) => {
+    axios.patch(`${_url}/${todolist.id}/toggle`).then((response) => {
+      toast.success('代辦更新完成', {
         position: "bottom-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -111,9 +156,11 @@ const Todolist = () => {
         draggable: true,
         progress: '',
         theme: "colored",
-        })
+        }
+      )
+      todolist.completed_at = 'toggle'
     }).catch(() => {
-      toast.error('刪除資料失敗', {
+      toast.error('toggle失败', {
         position: "bottom-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -122,39 +169,63 @@ const Todolist = () => {
         draggable: true,
         progress: '',
         theme: "colored",
-        })
+  })
+  })
+  }
+  const rmActiveTodoAll = async () => {
+    const needDelete = todos.filter((item)=>{return item.completed_at})
+    const test = needDelete.map((item)=>{
+      return new Promise(async (resolve) => {
+        await rmTodo(item ,true)
+        resolve()
+      })
     })
+    await Promise.all(test)
+    console.log(needDelete , test)
+    
+    getTodo()
   }
 
-  const TodoRender = (props) => {
+
+
+  const TodoRender = ({props}) => {
     return (
       <>
-        <li>
-          <label htmlFor="">
-            <input type="checkbox" id="" defaultChecked={props.completed_at} />
-            <p>{props.content}</p>
+        <li className="flex justify-between items-center group">
+          <label className="w-full flex items-center py-4 ml-6 border-b-[1px] border-[#E5E5E5]" htmlFor={props.id}>
+            <input className="w-5 h-5 rounded-[5px] mr-4 peer" type="checkbox" id={props.id} defaultChecked={props.completed_at} onChange={()=>toggleTodo(props)} />
+            <p className="peer-checked:line-through peer-checked:text-[#9F9A91]">{props.content}</p>
           </label>
-          <a href="#" onClick={(e)=>{
+          <a href="#" className="invisible mx-4 text-[24px] group-hover:visible"
+          onClick={(e)=>{
             e.preventDefault()
-            rmTodo()
-          }}></a>
+            rmTodo(props)
+          }}>
+            <i className="fa-solid fa-x"></i>
+          </a>
         </li>
       </>
     )
   }
   const Render = () => {
-    // console.log(todos)
-    return todos.map((item, i)=>{ 
-      console.log(item)
-      return <TodoRender key={i} props={item} />
-    })
+    switch(state){
+      case 'all':
+        return todos.map((item, i)=>{
+          return <TodoRender key={i} props={item} />
+        })
+      case 'inactive':
+        return todos.filter((item)=>{return !item.completed_at}).map((item, i)=>{
+          return <TodoRender key={i} props={item} />
+        })
+      case 'completed':
+        return todos.filter((item)=>{return item.completed_at}).map((item, i)=>{
+          return <TodoRender key={i} props={item} />
+      })
+    }
   }
 
 
   const TodoMenu = () => {
-
-    const [state, setState] = useState('all')
-  
   
     const changeState = (e, state) => {
       e.preventDefault()
@@ -164,14 +235,21 @@ const Todolist = () => {
     return (
       <>
         <div className="bg-white rounded-[10px]">
-          <ul className="flex justify-between">
+          <ul className="flex justify-between mb-2">
             <li className="w-1/3"><a className={`block py-4 text-center text-sm  border-b-2  ${state === 'all'? 'text-[#333333] border-[#333333]':'text-[#9F9A91] border-[#EFEFEF]'}`} onClick={(e)=>{changeState(e,'all')}} href="#">全部</a></li>
-            <li className="w-1/3"><a className={`block py-4 text-center text-sm  border-b-2  ${state === 'active'? 'text-[#333333] border-[#333333]':'text-[#9F9A91] border-[#EFEFEF]'}`} onClick={(e)=>{changeState(e,'active')}} href="#">待完成</a></li>
+            <li className="w-1/3"><a className={`block py-4 text-center text-sm  border-b-2  ${state === 'inactive'? 'text-[#333333] border-[#333333]':'text-[#9F9A91] border-[#EFEFEF]'}`} onClick={(e)=>{changeState(e,'inactive')}} href="#">待完成</a></li>
             <li className="w-1/3"><a className={`block py-4 text-center text-sm  border-b-2  ${state === 'completed'? 'text-[#333333] border-[#333333]':'text-[#9F9A91] border-[#EFEFEF]'}`} onClick={(e)=>{changeState(e,'completed')}} href="#">已完成</a></li>
           </ul>
           <ul>
             {Render()}
           </ul>
+          <div className="flex justify-between items-center mt-6 pb-8">
+            <p className="ml-6">{todos.filter((item)=>{return !item.completed_at}).length} 個待完成事項</p>
+            <a className="text-[#9F9A91] mr-12" href="#" onClick={(e)=>{
+              e.preventDefault()
+              rmActiveTodoAll()
+            }}>清除已完成項目</a>
+          </div>
         </div>
       </>
     )
@@ -185,7 +263,7 @@ const Todolist = () => {
           <Link to='/todolist'><img className="" src="./images/title.png" alt="" /></Link>
           <div className="flex items-center">
             <h1 className="font-bold mr-6">{localStorage.getItem('nickName')}的代辦</h1>
-            <input className="p-2 rounded-xl cursor-pointer hover:ring-4" type="button" value="登出" />
+            <input className="p-2 rounded-xl cursor-pointer hover:ring-4" type="button" value="登出" onClick={()=>{signOut()}} />
           </div>
         </header>
         <div className="w-1/2 mx-auto">
