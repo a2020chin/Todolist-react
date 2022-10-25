@@ -52,7 +52,7 @@ const SignUp = () => {
         <p className="text-[#d87355] font-bold text-sm mb-4">{errors.email?.message}</p>
 
         <label className="block font-bold text-sm mb-1" htmlFor="nickname">您的暱稱</label>
-        <input className="mb-1 w-full rounded-[10px] py-3 px-4 focus:ring-4 focus:outline-0" id="nickname" type="nickname" placeholder="請輸入您的暱稱" {...register("nickname",{
+        <input className="mb-1 w-full rounded-[10px] py-3 px-4 focus:ring-4 focus:outline-0" id="nickname" type="text" placeholder="請輸入您的暱稱" {...register("nickname",{
           required: {
             value: true,
             message: '請輸入資料內容!'
